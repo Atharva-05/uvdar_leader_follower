@@ -1,7 +1,7 @@
 Instructions moved to:
 https://github.com/ctu-mrs/leader_follower_task
 
-Example Solution:
+Example Solution:\
 ![Image](/example.gif)
 
 Detailed explanation of the approach used can be found [here](https://drive.google.com/file/d/1517n-fFle8wp5AfqpuEsH1lDs55guth1/view?usp=share_link)\
