@@ -59,6 +59,7 @@ windows:
         - export UAV_NAME=uav1; waitForControl; roslaunch mrs_rviz_plugins load_robot.launch
         - export UAV_NAME=uav2; waitForControl; roslaunch mrs_rviz_plugins load_robot.launch
         - waitForControl; sleep 3; roslaunch uvdar_leader_follower rviz.launch
+        - waitForOdometry; sleep 10; rosrun custom_utils visualiser.py
   - update_controllers:
       layout: tiled
       panes:
@@ -100,3 +101,13 @@ windows:
       panes:
         - waitForOdometry; sleep 8; gz camera -c gzclient_camera -f uav2
         - waitForControl; sleep 5; ~/.i3/layout_manager.sh layout.json
+
+  - slow_down:
+      layout: tiled
+      panes:
+        - waitForOdometry; sleep 5; gz physics -u 100
+
+  - custom_utils:
+      layout: tiled
+      panes:
+        - waitForControl; sleep 10; rosrun custom_utils trajectory_tracer.py

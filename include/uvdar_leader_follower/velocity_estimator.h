@@ -8,7 +8,8 @@
 class VelocityEstimator {
 
 public:
-  using kalman3D = mrs_lib::LKF<6, 3, 3>;
+  // using kalman3D = mrs_lib::LKF<6, 3, 6>;          // Including velocity measurements
+  using kalman3D = mrs_lib::LKF<6, 3, 3>;             // Excluding velocity measurements
 
 private:
   std::unique_ptr<kalman3D> velocity_estimator_;
@@ -30,10 +31,10 @@ public:
   /**
    * @brief Construct the system matrices and initialize the estimator
    *
-   * @param Q - process noise matrix (6x6)
-   * @param R - measurement noise matrix (3x3)
-   * @param x0 - initial state (x,y,z,dx,dy,dz)
-   * @param dt - time step between iterations
+   * @param Q   - process noise matrix (6x6)
+   * @param R   - measurement noise matrix (6x6)
+   * @param x0  - initial state (x,y,z,dx,dy,dz)
+   * @param dt  - time step between iterations
    */
   VelocityEstimator(kalman3D::Q_t Q, kalman3D::R_t R, kalman3D::x_t inital_states, double dt);
 
@@ -52,9 +53,12 @@ public:
    * Incorporates new observations of the system state into the model.
    *
    * @param position_measurement - measurement (observation) of the system state
+   * @param position_covariance  - covariance (from UVDAR Kalman Filter) of position
    *
    * @return Vector6 (x,y,z,dx,dy,dz) system states after the fusion
    */
+  // kalman3D::x_t fuse(Eigen::Vector3d position_measurement, Eigen::Vector3d velocity_measurement);
+  // kalman3D::x_t fuse(Eigen::Vector3d position_measurement, Eigen::Matrix<double, 3, 3> position_covariance);
   kalman3D::x_t fuse(Eigen::Vector3d position_measurement);
 
   /**

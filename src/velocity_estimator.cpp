@@ -12,20 +12,20 @@ A <<
     0, 0, 0, 1, 0, 0,
     0, 0, 0, 0, 1, 0,
     0, 0, 0, 0, 0, 1;
-
+  // B matrix is zero in case of constant velocity model. Modified in case acceleration inputs become available in the future
   B << 
     0, 0, 0,
     0, 0, 0,
     0, 0, 0,
-    1, 0, 0,
-    0, 1, 0,
-    0, 0, 1;
+    dt, 0, 0,
+    0, dt, 0,
+    0, 0, dt;
 
+  // Measurements available are [x, y, z]
   H << 
     1, 0, 0, 0, 0, 0,
     0, 1, 0, 0, 0, 0,
     0, 0, 1, 0, 0, 0;
-
 
   this->Q  = Q;
   this->R  = R;
@@ -51,7 +51,7 @@ A <<
 /* predict //{ */
 VelocityEstimator::kalman3D::x_t VelocityEstimator::predict(Eigen::Vector3d velocity_estimate, double dt_since_last_prediction) {
   kalman3D::u_t u;
-  u << velocity_estimate.x(), velocity_estimate.y();
+  u << 0.0, 0.0, 0.0;    // How is this valid? | Why is velocity an input to the system? (was feeding velocity as inputs earlier)
   kalman3D::A_t A_new;
   A_new << 
     1, 0, 0, dt, 0, 0,
@@ -61,7 +61,6 @@ VelocityEstimator::kalman3D::x_t VelocityEstimator::predict(Eigen::Vector3d velo
     0, 0, 0, 0, 1, 0,
     0, 0, 0, 0, 0, 1;
 
-
   velocity_estimator_->A = A_new;
   dt                     = dt_since_last_prediction;
   sc                     = velocity_estimator_->predict(sc, u, Q, dt);
@@ -70,10 +69,16 @@ VelocityEstimator::kalman3D::x_t VelocityEstimator::predict(Eigen::Vector3d velo
 //}
 
 /* fuse //{ */
+// VelocityEstimator::kalman3D::x_t VelocityEstimator::fuse(Eigen::Vector3d position_measurement, Eigen::Vector3d velocity_measurement) {
 VelocityEstimator::kalman3D::x_t VelocityEstimator::fuse(Eigen::Vector3d position_measurement) {
+  // Updated to include velocity measurement
   kalman3D::z_t measurement;
-  measurement << position_measurement.x(), position_measurement.y(), position_measurement.z();
-  sc = velocity_estimator_->correct(sc, measurement, R);
+  // measurement << position_measurement.x(), position_measurement.y(), position_measurement.z(), velocity_measurement.x(), velocity_measurement.y(), velocity_measurement.z();
+  measurement << position_measurement.x(), position_measurement.y(), position_measurement.z();  // Updating latest measured pose
+  // this->R = position_covariance;
+  // kalman3D::R_t new_covariance;
+  // new_covariance = position_covariance;                                                                 // Updating measurement covariance from previous KF
+  sc = velocity_estimator_->correct(sc, measurement, this->R);
   return sc.x;
 }
 //}
